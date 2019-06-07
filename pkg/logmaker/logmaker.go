@@ -8,11 +8,12 @@ import (
 	"time"
 
 	"github.com/lichuan0620/logtap/pkg/fieldpath"
+	"github.com/lichuan0620/logtap/pkg/logger"
 )
 
-// A LogMaker is a runnable worker that generates log messages in a predefined way.
+// A LogMaker is a runnable worker that keep generating log messages in a predefined way.
 type LogMaker interface {
-	// GetTask is used to inspect the underlaying task; it return a copy of the LogTask.
+	// GetTask is used to inspect the underlying task; it return a copy of the LogTask.
 	GetTask() *LogTask
 
 	// Run prompts the LogMaker to start generating logs and blocks until it stops. The LogMaker would stop when
@@ -27,8 +28,7 @@ type logMakerImpl struct {
 	once  chan struct{}
 }
 
-// NewLogMaker creates and initialize a LogMaker with the given name; its behavior is defined by the given
-// LogTaskSpec object.
+// NewLogMaker creates a LogMaker with the given name; its behavior is defined by the given LogTaskSpec object.
 func NewLogMaker(taskTemplate *LogTaskSpec, name string) (LogMaker, error) {
 	if err := ValidateLogTaskSpec(fieldpath.NewFieldPath(), taskTemplate); err != nil {
 		return nil, err
@@ -70,12 +70,12 @@ func (lm *logMakerImpl) Run(stopCh <-chan struct{}) error {
 	default:
 		return fmt.Errorf("[%s] unsupported output kind: %s", lm.task.Name, lm.task.Spec.OutputKind)
 	}
-	var worker logger
+	var worker logger.Logger
 	switch lm.task.Spec.ContentType {
 	case ContentTypeExplicit:
-		worker = newExplicitLogger(output, lm.task.Spec.Message, lm.task.Name, lm.task.Spec.TimestampFormat)
+		worker = logger.NewExplicitLogger(output, lm.task.Spec.Message, lm.task.Name, lm.task.Spec.TimestampFormat)
 	case ContentTypeRandom:
-		worker = newRandomLogger(output, lm.task.Spec.MinSize, lm.task.Name, lm.task.Spec.TimestampFormat)
+		worker = logger.NewRandomLogger(output, lm.task.Spec.MinSize, lm.task.Name, lm.task.Spec.TimestampFormat)
 	default:
 		return fmt.Errorf("[%s] unsupported content type: %s", lm.task.Name, lm.task.Spec.ContentType)
 	}
@@ -88,7 +88,7 @@ func (lm *logMakerImpl) Run(stopCh <-chan struct{}) error {
 			return nil
 		case <-timer.C:
 			timer.Reset(interval)
-			size, err := worker.Log()
+			_, size, err := worker.Log()
 			if err != nil {
 				return fmt.Errorf("[%s] failed to write log: %s", lm.task.Name, err.Error())
 			}
