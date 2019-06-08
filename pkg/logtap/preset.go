@@ -6,16 +6,16 @@ import (
 )
 
 const (
-	// TaskPresetStandard produces a load of 256 B/log and 10 logs/s, and 2.5 KiB/s.
+	// TaskPresetStandard produces a load of 256 B/log, 10 logs/s, and 2.5 KiB/s.
 	TaskPresetStandard = "Standard"
 
 	// TaskPresetLong produces a load of 20 MiB/log, 0.5 log/s, and 10 Mib/s.
 	TaskPresetLong = "Long"
 
-	// TaskPresetFrequent produces a load of 256 B/log and 50000 log/s, and 12 Mib/s.
+	// TaskPresetFrequent produces a load of 256 B/log, 50000 log/s, and 12 Mib/s.
 	TaskPresetFrequent = "Frequent"
 
-	// TaskPresetRoast produces a load of 1 MiB/log and 40 log/s, and 40 Mib/s
+	// TaskPresetRoast produces a load of 1 MiB/log, 40 log/s, and 40 Mib/s.
 	TaskPresetRoast = "Roast"
 )
 
@@ -52,10 +52,11 @@ var (
 	}
 )
 
+// GetLogTaskSpecPreset returns a LogTaskSpec preset by its name or an error if no preset has that name.
 func GetLogTaskSpecPreset(preset string) (*LogTaskSpec, error) {
 	ret, exist := presets[preset]
 	if !exist {
-		return nil, fmt.Errorf("preset not found")
+		return nil, fmt.Errorf("%s is not a valid preset", preset)
 	}
 	return ret.DeepCopy(), nil
 }

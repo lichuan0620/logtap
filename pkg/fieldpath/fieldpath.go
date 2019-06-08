@@ -26,7 +26,7 @@ func (f fieldPathImpl) String() string {
 
 func (f fieldPathImpl) Add(field string) FieldPath {
 	ret := &fieldPathImpl{
-		fields: make([]string, 0, len(f.fields)+1),
+		fields: make([]string, len(f.fields)+1),
 	}
 	copy(ret.fields, f.fields)
 	ret.fields[len(f.fields)] = field

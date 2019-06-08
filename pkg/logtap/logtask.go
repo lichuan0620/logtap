@@ -2,46 +2,37 @@ package logtap
 
 import "time"
 
-// OutputKind defines the valid output channels to where the log messages should be printed.
-type OutputKind string
-
 const (
 	// OutputKindFile means the log messages should be written to a file.
-	OutputKindFile OutputKind = "File"
+	OutputKindFile = "File"
 
 	// OutputKindStdErr means the log messages should be written to STDERR
-	OutputKindStdErr OutputKind = "StdErr"
+	OutputKindStdErr = "STDERR"
 
 	// OutputKindStdOut means the log messages should be written to STDOUT
-	OutputKindStdOut OutputKind = "StdOut"
+	OutputKindStdOut = "STDOUT"
 )
-
-// ContentType defines the valid content types that a log message could have.
-type ContentType string
 
 const (
 	// ContentTypeExplicit means the log messages are explicitly defined.
-	ContentTypeExplicit ContentType = "Explicit"
+	ContentTypeExplicit = "Explicit"
 
-	// ContentTypeRandom means the log messages have a contain a predefined number of random characters
-	ContentTypeRandom ContentType = "Random"
+	// ContentTypeRandom means the log messages have a predefined number of random characters
+	ContentTypeRandom = "Random"
 )
-
-// Phase defines the valid phases that a LogTask may have.
-type Phase string
 
 const (
 	// PhaseIdle means a task is not running.
-	PhaseIdle Phase = "Idle"
+	PhaseIdle = "Idle"
 
 	// PhaseRunning means a task is running.
-	PhaseRunning Phase = "Running"
+	PhaseRunning = "Running"
 
 	// PhaseStopped means a task has finished without any error.
-	PhaseStopped Phase = "Stopped"
+	PhaseStopped = "Stopped"
 
 	// PhaseFailed means a task has abnormally stopped functioning.
-	PhaseFailed Phase = "Failed"
+	PhaseFailed = "Failed"
 )
 
 // LogTask describes a running LogTask.
@@ -61,7 +52,7 @@ type Metadata struct {
 // should the log messages go, and how often to send them.
 type LogTaskSpec struct {
 	// OutputKind is the output channel to be used.
-	OutputKind OutputKind `json:"outputKind"`
+	OutputKind string `json:"outputKind"`
 
 	// Path to the log file; only effective if `OutputKind` is `File`.
 	Filepath string `json:"filepath,omitempty"`
@@ -71,8 +62,8 @@ type LogTaskSpec struct {
 	// timestamp.
 	TimestampFormat string `json:"timestampFormat,omitempty"`
 
-	// ContentType determines whether Message or MinSize should be used to produce the logs.
-	ContentType ContentType `json:"contentType"`
+	// ContentType determines whether Message or MinSize should be used to produce the log messages.
+	ContentType string `json:"contentType"`
 
 	// Message is the exact message that each log should print
 	// Message must hold non-zero value if and only if ContentType is ContentTypeExplicit
@@ -90,7 +81,7 @@ type LogTaskSpec struct {
 // LogTaskStatus describes the status of a running log task.
 type LogTaskStatus struct {
 	// Phase is the current phase that the task is in.
-	Phase Phase `json:"phase"`
+	Phase string `json:"phase"`
 
 	// PhaseTimestamp is the time at which the current phase started.
 	PhaseTimestamp time.Time `json:"phaseTimestamp"`

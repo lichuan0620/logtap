@@ -85,7 +85,7 @@ func ValidateLogTaskStatus(path fieldpath.FieldPath, status *LogTaskStatus) erro
 }
 
 func newValidationError(path, reason string) error {
-	return fmt.Errorf("invalid field <%s>: %s", path, reason)
+	return fmt.Errorf("failed to validate '%s': %s", path, reason)
 }
 
 func newInvalidValueError(path string) error {

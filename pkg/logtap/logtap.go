@@ -16,9 +16,8 @@ type LogTap interface {
 	// GetTask is used to inspect the underlying task; it return a copy of the LogTask.
 	GetTask() *LogTask
 
-	// Run prompts the LogTap to start generating logs and blocks until it stops. The LogTap would stop when
-	// either the stopCh was closed or an error occurred. Run can only be called once per LogTap instance; a
-	// second call would cause a panic.
+	// Run prompts the LogTap to start generating log messages and blocks until it stops. The LogTap would stop
+	// when either the stopCh was closed or an error occurred. Run can only be called once per LogTap instance.
 	Run(stopCh <-chan struct{}) error
 }
 
@@ -113,7 +112,7 @@ func (lm *logTapImpl) recordLogStatus(size int) {
 	lm.task.Status.SentBytes += int64(size)
 }
 
-func (lm *logTapImpl) setPhase(phase Phase, reason string) {
+func (lm *logTapImpl) setPhase(phase string, reason string) {
 	lm.mutex.Lock()
 	defer lm.mutex.Unlock()
 	lm.task.Status.PhaseTimestamp = time.Now().UTC()

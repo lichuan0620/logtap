@@ -3,7 +3,6 @@ package logger
 import (
 	"bytes"
 	"fmt"
-	"log"
 	"testing"
 	"time"
 )
@@ -116,13 +115,11 @@ func TestRandomLogger_Log(t *testing.T) {
 				randStrings = append(randStrings, writer.String()[len(want):writer.Len()-1])
 			}
 			for l, r := 0, 1; r < repeats; l, r = r, r+1 {
-				if len(randStrings[l]) > 0 {
-					if randStrings[l] == randStrings[r] {
-						t.Fatalf(
-							`two consecutive logs have same content: left "%s" right "%s"`,
-							randStrings[l], randStrings[r],
-						)
-					}
+				if len(randStrings[l]) > 0 && randStrings[l] == randStrings[r] {
+					t.Fatalf(
+						`two consecutive log messages have same content: left "%s" right "%s"`,
+						randStrings[l], randStrings[r],
+					)
 				}
 			}
 		})
@@ -132,20 +129,14 @@ func TestRandomLogger_Log(t *testing.T) {
 func BenchmarkRandomLogger_Log(b *testing.B) {
 	const (
 		size  = 1048576
-		count = 500
+		count = 400
 	)
 	writer := new(bytes.Buffer)
 	writer.Grow(size)
 	logger := NewRandomLogger(writer, size, "Benchmark", time.RFC3339)
-	start := time.Now()
 	b.ResetTimer()
 	for i := 0; i < count; i++ {
 		writer.Reset()
-		b.StartTimer()
-		if _, _, err := logger.Log(); err != nil {
-			b.Fatalf("benchmark failed: %s", err.Error())
-		}
+		logger.Log()
 	}
-	b.StopTimer()
-	log.Println(time.Now().Sub(start).String())
 }
