@@ -2,6 +2,7 @@ package logger
 
 import (
 	"encoding/hex"
+	"fmt"
 	"io"
 	"math/rand"
 	"sync"
@@ -25,10 +26,9 @@ func NewRandomLogger(writer io.Writer, size int, name string, timestampFormat st
 		name:            name,
 		timestampFormat: timestampFormat,
 	}
-	_, prefix := getPrefix(name, timestampFormat)
-	prefixSize := len(prefix)
-	if prefixSize >= size {
-		size = prefixSize + 1
+	maxPrefixSize := len(fmt.Sprintf("%s [%s]\n", timestampFormat, name))
+	if maxPrefixSize >= size {
+		size = maxPrefixSize
 	}
 	ret.newLinePos = size - 1
 	ret.logBuffer = make([]byte, size)
