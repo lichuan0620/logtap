@@ -27,6 +27,23 @@ const (
 	ContentTypeRandom ContentType = "Random"
 )
 
+// Phase defines the valid phases that a LogTask may have.
+type Phase string
+
+const (
+	// PhaseIdle means a task is not running.
+	PhaseIdle Phase = "Idle"
+
+	// PhaseRunning means a task is running.
+	PhaseRunning Phase = "Running"
+
+	// PhaseStopped means a task has finished without any error.
+	PhaseStopped Phase = "Stopped"
+
+	// PhaseFailed means a task has abnormally stopped functioning.
+	PhaseFailed Phase = "Failed"
+)
+
 // LogTask describes a running LogTask.
 type LogTask struct {
 	Metadata `json:"metadata"`
@@ -72,6 +89,15 @@ type LogTaskSpec struct {
 
 // LogTaskStatus describes the status of a running log task.
 type LogTaskStatus struct {
+	// Phase is the current phase that the task is in.
+	Phase Phase `json:"phase"`
+
+	// PhaseTimestamp is the time at which the current phase started.
+	PhaseTimestamp time.Time `json:"phaseTimestamp"`
+
+	// Reason describes why the task is in its current phase.
+	Reason string `json:"reason,omitempty"`
+
 	// The number of logs messages that a running log task has produced.
 	SentCount int64 `json:"sentCount"`
 

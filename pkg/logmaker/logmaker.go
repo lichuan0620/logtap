@@ -37,13 +37,14 @@ func NewLogMaker(taskTemplate *LogTaskSpec, name string) (LogMaker, error) {
 		task: &LogTask{
 			Metadata: Metadata{
 				Name:              name,
-				CreationTimestamp: time.Now(),
+				CreationTimestamp: time.Now().UTC(),
 			},
 			Spec:   taskTemplate.DeepCopy(),
 			Status: new(LogTaskStatus),
 		},
 		once: make(chan struct{}),
 	}
+	ret.setPhase(PhaseIdle, "")
 	return ret, nil
 }
 
@@ -68,7 +69,9 @@ func (lm *logMakerImpl) Run(stopCh <-chan struct{}) error {
 		}
 		defer file.Close()
 	default:
-		return fmt.Errorf("[%s] unsupported output kind: %s", lm.task.Name, lm.task.Spec.OutputKind)
+		reason := fmt.Sprintf("[%s] unsupported output kind: %s", lm.task.Name, lm.task.Spec.OutputKind)
+		lm.setPhase(PhaseFailed, reason)
+		return fmt.Errorf(reason)
 	}
 	var worker logger.Logger
 	switch lm.task.Spec.ContentType {
@@ -77,20 +80,26 @@ func (lm *logMakerImpl) Run(stopCh <-chan struct{}) error {
 	case ContentTypeRandom:
 		worker = logger.NewRandomLogger(output, lm.task.Spec.MinSize, lm.task.Name, lm.task.Spec.TimestampFormat)
 	default:
-		return fmt.Errorf("[%s] unsupported content type: %s", lm.task.Name, lm.task.Spec.ContentType)
+		reason := fmt.Sprintf("[%s] unsupported content type: %s", lm.task.Name, lm.task.Spec.ContentType)
+		lm.setPhase(PhaseFailed, reason)
+		return fmt.Errorf(reason)
 	}
+	lm.setPhase(PhaseRunning, "")
 	interval := time.Duration(float64(time.Second) * lm.task.Spec.Interval)
 	timer := time.NewTimer(0)
 	defer timer.Stop()
 	for {
 		select {
 		case <-stopCh:
+			lm.setPhase(PhaseStopped, "")
 			return nil
 		case <-timer.C:
 			timer.Reset(interval)
 			_, size, err := worker.Log()
 			if err != nil {
-				return fmt.Errorf("[%s] failed to write log: %s", lm.task.Name, err.Error())
+				reason := fmt.Sprintf("[%s] failed to write log: %s", lm.task.Name, err.Error())
+				lm.setPhase(PhaseFailed, reason)
+				return fmt.Errorf(reason)
 			}
 			lm.recordLogStatus(size)
 		}
@@ -102,4 +111,12 @@ func (lm *logMakerImpl) recordLogStatus(size int) {
 	defer lm.mutex.Unlock()
 	lm.task.Status.SentCount++
 	lm.task.Status.SentBytes += int64(size)
+}
+
+func (lm *logMakerImpl) setPhase(phase Phase, reason string) {
+	lm.mutex.Lock()
+	defer lm.mutex.Unlock()
+	lm.task.Status.PhaseTimestamp = time.Now().UTC()
+	lm.task.Status.Phase = phase
+	lm.task.Status.Reason = reason
 }

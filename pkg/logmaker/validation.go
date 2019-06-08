@@ -67,6 +67,13 @@ func ValidateLogTaskSpec(path fieldpath.FieldPath, spec *LogTaskSpec) error {
 
 // ValidateLogTaskStatus validates a LogTaskStatus object.
 func ValidateLogTaskStatus(path fieldpath.FieldPath, status *LogTaskStatus) error {
+	switch status.Phase {
+	case PhaseIdle:
+	case PhaseRunning:
+	case PhaseFailed:
+	default:
+		return newValidationError(path.Add("phase").String(), "unrecognized phase")
+	}
 	if status.SentCount < 0 {
 		return newInvalidValueError(path.Add("sentCount").String())
 	}
