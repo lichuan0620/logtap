@@ -1,4 +1,4 @@
-package logmaker
+package logtap
 
 import (
 	"fmt"
@@ -11,29 +11,29 @@ import (
 	"github.com/lichuan0620/logtap/pkg/logger"
 )
 
-// A LogMaker is a runnable worker that keep generating log messages in a predefined way.
-type LogMaker interface {
+// A LogTap is a runnable worker that keep generating log messages in a predefined way.
+type LogTap interface {
 	// GetTask is used to inspect the underlying task; it return a copy of the LogTask.
 	GetTask() *LogTask
 
-	// Run prompts the LogMaker to start generating logs and blocks until it stops. The LogMaker would stop when
-	// either the stopCh was closed or an error occurred. Run can only be called once per LogMaker instance; a
+	// Run prompts the LogTap to start generating logs and blocks until it stops. The LogTap would stop when
+	// either the stopCh was closed or an error occurred. Run can only be called once per LogTap instance; a
 	// second call would cause a panic.
 	Run(stopCh <-chan struct{}) error
 }
 
-type logMakerImpl struct {
+type logTapImpl struct {
 	task  *LogTask
 	mutex sync.Mutex
 	once  chan struct{}
 }
 
-// NewLogMaker creates a LogMaker with the given name; its behavior is defined by the given LogTaskSpec object.
-func NewLogMaker(taskTemplate *LogTaskSpec, name string) (LogMaker, error) {
+// NewLogTap creates a LogTap with the given name; its behavior is defined by the given LogTaskSpec object.
+func NewLogTap(taskTemplate *LogTaskSpec, name string) (LogTap, error) {
 	if err := ValidateLogTaskSpec(fieldpath.NewFieldPath(), taskTemplate); err != nil {
 		return nil, err
 	}
-	ret := &logMakerImpl{
+	ret := &logTapImpl{
 		task: &LogTask{
 			Metadata: Metadata{
 				Name:              name,
@@ -48,13 +48,13 @@ func NewLogMaker(taskTemplate *LogTaskSpec, name string) (LogMaker, error) {
 	return ret, nil
 }
 
-func (lm logMakerImpl) GetTask() *LogTask {
+func (lm logTapImpl) GetTask() *LogTask {
 	lm.mutex.Lock()
 	defer lm.mutex.Unlock()
 	return lm.task.DeepCopy()
 }
 
-func (lm *logMakerImpl) Run(stopCh <-chan struct{}) error {
+func (lm *logTapImpl) Run(stopCh <-chan struct{}) error {
 	close(lm.once)
 	var output io.Writer
 	switch lm.task.Spec.OutputKind {
@@ -106,14 +106,14 @@ func (lm *logMakerImpl) Run(stopCh <-chan struct{}) error {
 	}
 }
 
-func (lm *logMakerImpl) recordLogStatus(size int) {
+func (lm *logTapImpl) recordLogStatus(size int) {
 	lm.mutex.Lock()
 	defer lm.mutex.Unlock()
 	lm.task.Status.SentCount++
 	lm.task.Status.SentBytes += int64(size)
 }
 
-func (lm *logMakerImpl) setPhase(phase Phase, reason string) {
+func (lm *logTapImpl) setPhase(phase Phase, reason string) {
 	lm.mutex.Lock()
 	defer lm.mutex.Unlock()
 	lm.task.Status.PhaseTimestamp = time.Now().UTC()

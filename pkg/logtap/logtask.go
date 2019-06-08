@@ -1,4 +1,4 @@
-package logmaker
+package logtap
 
 import "time"
 

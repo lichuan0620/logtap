@@ -1,7 +1,8 @@
-package logmaker
+package logtap
 
 import (
 	"fmt"
+
 	"github.com/lichuan0620/logtap/pkg/fieldpath"
 )
 
