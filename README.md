@@ -32,7 +32,7 @@ docker pull lichuan0620/logtap:latest
 docker run lichuan0620/logtap:latest -h
 
 # run
-docker run lichuan0620/logtap:latest -t Roast
+docker run -p "8080:8080" lichuan0620/logtap:latest -t Roast
 ``` 
 
 #### Build from source
@@ -41,7 +41,7 @@ If you don't have or don't want to use Docker.
 
 ```
 # clone the source code from GitHub
-git clone https://github.com/lichuan0620/logtap.git
+git clone https://github.com/lichuan0620/logtap.git && cd logtap
 
 # build the bin
 make build-local

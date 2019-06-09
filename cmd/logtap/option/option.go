@@ -16,9 +16,10 @@ import (
 )
 
 const (
-	defaultTimestamp = time.RFC3339Nano
-	defaultMinSize   = 128
-	defaultInterval  = 0.5
+	defaultTimestamp  = time.RFC3339Nano
+	defaultMinSize    = 128
+	defaultInterval   = 0.5
+	defaultWebAddress = ":8080"
 
 	noDefault = ""
 )
@@ -26,6 +27,9 @@ const (
 var (
 	// Spec is the LogTaskSpec created according the the command line options.
 	Spec = new(model.LogTaskSpec)
+
+	// WebAddress is the address to listen on for most HTTP requests.
+	WebAddress string
 
 	// Name is used to differentiate different deployments.
 	Name string
@@ -125,6 +129,11 @@ func parse() {
 	commandLine.StringVarP(
 		&Name, "name", "n", getEnv("LOGTAP_NAME", getEnv("HOST", version.Name)),
 		"The name given to LogTap to differentiate different deployments",
+	)
+
+	commandLine.StringVar(
+		&WebAddress, "web.address", getEnv("LOGTAP_WEB_ADDRESS", defaultWebAddress),
+		"The address to listen on for most HTTP requests",
 	)
 
 	commandLine.StringVar(&Spec.OutputKind,
