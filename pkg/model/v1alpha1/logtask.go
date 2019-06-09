@@ -1,4 +1,4 @@
-package logtap
+package v1alpha1
 
 import "time"
 
@@ -40,12 +40,6 @@ type LogTask struct {
 	Metadata `json:"metadata"`
 	Spec     *LogTaskSpec   `json:"spec"`
 	Status   *LogTaskStatus `json:"status"`
-}
-
-// Metadata stores the metadata of a LogTask.
-type Metadata struct {
-	Name              string    `json:"name"`
-	CreationTimestamp time.Time `json:"creationTimestamp,omitempty"`
 }
 
 // LogTaskSpec defines how should a log sending task work. It contains information including what to send, where

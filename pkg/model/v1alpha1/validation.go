@@ -1,4 +1,4 @@
-package logtap
+package v1alpha1
 
 import (
 	"fmt"
@@ -8,11 +8,25 @@ import (
 
 // ValidateLogTask validates a LogTask object.
 func ValidateLogTask(path fieldpath.FieldPath, task *LogTask) (err error) {
+	if err = ValidateMetadata(path.Add("metadata"), &task.Metadata); err != nil {
+		return err
+	}
 	if err = ValidateLogTaskSpec(path.Add("spec"), task.Spec); err != nil {
 		return err
 	}
 	if err = ValidateLogTaskStatus(path.Add("status"), task.Status); err != nil {
 		return err
+	}
+	return nil
+}
+
+// ValidateMetadata validates a Metadata object
+func ValidateMetadata(path fieldpath.FieldPath, metadata *Metadata) error {
+	if metadata.Version != Version {
+		return newValidationError(
+			path.Add("version").String(),
+			fmt.Sprintf("unexpected version '%s' (want '%s')", metadata.Version, Version),
+		)
 	}
 	return nil
 }

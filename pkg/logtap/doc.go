@@ -1,3 +1,2 @@
-// Package logtap implements LogTap, an interface for running tasks that generating log messages in a
-// predefined way, and LogTask, a struct to define and describe such tasks.
+// Package logtap implements LogTap, an interface for generating log messages in a controlled, predefined way.
 package logtap

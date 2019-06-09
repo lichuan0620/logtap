@@ -10,6 +10,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
 	if err = logTap.Run(option.StopCh); err != nil {
 		panic(err)
 	}

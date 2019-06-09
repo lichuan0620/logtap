@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"fmt"
 	"io"
 	"time"
 )
@@ -24,6 +25,6 @@ func NewExplicitLogger(writer io.Writer, msg, name string, timestampFormat strin
 
 func (eg *explicitLogger) Log() (time.Time, int, error) {
 	t, prefix := getPrefix(eg.name, eg.timestampFormat)
-	size, err := eg.writer.Write([]byte(prefix + eg.msg))
+	size, err := eg.writer.Write([]byte(fmt.Sprintf("%s%s\n", prefix, eg.msg)))
 	return t, size, err
 }
